@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>水下鱼类检测系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0c2340 0%, #1a4b7a 50%, #0d6ebd 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            padding: 30px 0;
+            color: white;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .main-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+            margin-bottom: 30px;
+        }
+
+        .upload-section {
+            padding: 40px;
+            text-align: center;
+            border-bottom: 1px solid #eee;
+        }
+
+        .upload-area {
+            border: 3px dashed #0d6ebd;
+            border-radius: 15px;
+            padding: 60px 40px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: #f8fbff;
+        }
+
+        .upload-area:hover {
+            border-color: #0a5a9e;
+            background: #eef5ff;
+        }
+
+        .upload-area.dragover {
+            border-color: #00ff88;
+            background: #e6fff2;
+        }
+
+        .upload-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+        }
+
+        .upload-text {
+            font-size: 1.2em;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .upload-hint {
+            font-size: 0.9em;
+            color: #999;
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        .controls {
+            padding: 30px 40px;
+            background: #f9f9f9;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .control-group label {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        input[type="range"] {
+            width: 200px;
+            height: 8px;
+            border-radius: 4px;
+            background: #ddd;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #0d6ebd;
+            cursor: pointer;
+        }
+
+        .value-display {
+            background: #0d6ebd;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.9em;
+            min-width: 50px;
+            text-align: center;
+        }
+
+        .btn-detect {
+            background: linear-gradient(135deg, #0d6ebd 0%, #0a5a9e 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.1em;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-left: auto;
+        }
+
+        .btn-detect:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(13, 110, 189, 0.4);
+        }
+
+        .btn-detect:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .results-section {
+            padding: 40px;
+        }
+
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .results-header h2 {
+            color: #333;
+        }
+
+        .stats {
+            display: flex;
+            gap: 20px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #f8fbff 0%, #eef5ff 100%);
+            padding: 15px 25px;
+            border-radius: 10px;
+            text-align: center;
+            min-width: 120px;
+        }
+
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #0d6ebd;
+        }
+
+        .stat-label {
+            font-size: 0.85em;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .result-container {
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+
+        .original-image, .result-image {
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .image-card {
+            background: #f5f5f5;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+
+        .image-card-header {
+            background: #0d6ebd;
+            color: white;
+            padding: 15px 20px;
+            font-weight: 600;
+        }
+
+        .image-card img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .detection-list {
+            margin-top: 30px;
+        }
+
+        .detection-list h3 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .detection-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .detection-item {
+            background: #f8fbff;
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 4px solid #0d6ebd;
+        }
+
+        .detection-item .fish-id {
+            font-weight: bold;
+            color: #0d6ebd;
+        }
+
+        .detection-item .confidence {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #0d6ebd;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error-message {
+            background: #ffebee;
+            color: #c62828;
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        footer {
+            text-align: center;
+            color: white;
+            padding: 20px;
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>水下鱼类检测系统</h1>
+            <p>基于 Faster R-CNN 的水下鱼类目标检测 | 测试集 mAP@50: 96.46%</p>
+        </header>
+
+        <div class="main-card">
+            <div class="upload-section">
+                <div class="upload-area" id="uploadArea">
+                    <div class="upload-icon"> fish</div>
+                    <div class="upload-text">拖拽图片到此处，或点击选择文件</div>
+                    <div class="upload-hint">支持 JPG、PNG 格式，最大 16MB</div>
+                    <input type="file" id="fileInput" accept="image/*">
+                </div>
+            </div>
+
+            <div class="controls">
+                <button class="btn-detect" id="detectBtn" disabled>开始检测</button>
+            </div>
+
+            <div class="results-section" id="resultsSection" style="display: none;">
+                <div class="results-header">
+                    <h2>检测结果</h2>
+                    <div class="stats">
+                        <div class="stat-card">
+                            <div class="stat-value" id="fishCount">0</div>
+                            <div class="stat-label">检测到鱼</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="avgScore">0</div>
+                            <div class="stat-label">平均置信度</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="result-container">
+                    <div class="original-image">
+                        <div class="image-card">
+                            <div class="image-card-header">原始图像</div>
+                            <img id="originalImg" src="" alt="原始图像">
+                        </div>
+                    </div>
+                    <div class="result-image">
+                        <div class="image-card">
+                            <div class="image-card-header">检测结果</div>
+                            <img id="resultImg" src="" alt="检测结果">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="detection-list">
+                    <h3>检测详情</h3>
+                    <div class="detection-grid" id="detectionGrid"></div>
+                </div>
+            </div>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>正在检测中...</p>
+            </div>
+
+            <div class="error-message" id="errorMessage"></div>
+        </div>
+
+        <footer>
+            <p>Powered by Faster R-CNN + ResNet50-FPN | DeepFish Dataset</p>
+        </footer>
+    </div>
+
+    <script>
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const detectBtn = document.getElementById('detectBtn');
+        const resultsSection = document.getElementById('resultsSection');
+        const loading = document.getElementById('loading');
+        const errorMessage = document.getElementById('errorMessage');
+
+        let selectedFile = null;
+
+        // 上传区域点击
+        uploadArea.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        // 文件选择
+        fileInput.addEventListener('change', (e) => {
+            handleFile(e.target.files[0]);
+        });
+
+        // 拖拽上传
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            handleFile(e.dataTransfer.files[0]);
+        });
+
+        function handleFile(file) {
+            if (!file) return;
+
+            selectedFile = file;
+            detectBtn.disabled = false;
+
+            // 预览图像
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                document.getElementById('originalImg').src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+
+            // 显示结果区域
+            resultsSection.style.display = 'block';
+            document.getElementById('resultImg').src = '';
+            document.getElementById('fishCount').textContent = '-';
+            document.getElementById('avgScore').textContent = '-';
+            document.getElementById('detectionGrid').innerHTML = '';
+        }
+
+        // 检测按钮
+        detectBtn.addEventListener('click', async () => {
+            if (!selectedFile) return;
+
+            loading.classList.add('active');
+            errorMessage.style.display = 'none';
+            detectBtn.disabled = true;
+
+            const formData = new FormData();
+            formData.append('file', selectedFile);
+            formData.append('confidence', '0.9');
+
+            try {
+                const response = await fetch('/detect', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    // 显示结果
+                    document.getElementById('resultImg').src = result.result_image;
+                    document.getElementById('fishCount').textContent = result.fish_count;
+                    document.getElementById('avgScore').textContent = result.average_score.toFixed(3);
+
+                    // 显示检测详情
+                    const grid = document.getElementById('detectionGrid');
+                    grid.innerHTML = '';
+                    result.detections.forEach((det, i) => {
+                        const item = document.createElement('div');
+                        item.className = 'detection-item';
+                        item.innerHTML = `
+                            <div class="fish-id">Fish ${i + 1}</div>
+                            <div class="confidence">置信度: ${(det.score * 100).toFixed(1)}%</div>
+                        `;
+                        grid.appendChild(item);
+                    });
+                } else {
+                    showError(result.error || '检测失败');
+                }
+            } catch (error) {
+                showError('网络错误，请重试');
+            } finally {
+                loading.classList.remove('active');
+                detectBtn.disabled = false;
+            }
+        });
+
+        function showError(msg) {
+            errorMessage.textContent = msg;
+            errorMessage.style.display = 'block';
+        }
+    </script>
+</body>
+</html>

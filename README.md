@@ -23,7 +23,13 @@ sea_detection_project/
 │   ├── train.py               # 训练脚本
 │   ├── inference.py           # 推理脚本
 │   ├── evaluate.py            # 评估脚本
-│   └── generate_figures.py    # 图表生成
+│   ├── generate_figures.py    # 图表生成
+│   ├── app.py                 # Web应用后端
+│   ├── templates/             # HTML模板
+│   │   └── index.html         # 前端页面
+│   └── static/                # 静态资源
+│       ├── uploads/           # 上传目录
+│       └── results/           # 结果目录
 │
 ├── data/                       # 数据目录
 │   └── processed/             # 处理后的数据
@@ -104,6 +110,20 @@ python src/evaluate.py
 ```bash
 python src/generate_figures.py
 ```
+
+### 6. 启动Web应用
+
+```bash
+python src/app.py
+```
+
+然后在浏览器中访问: http://localhost:5000
+
+Web应用功能：
+- 上传水下图像
+- 实时检测鱼类
+- 显示检测结果和置信度
+- 可视化边界框
 
 ## 模型架构
 
