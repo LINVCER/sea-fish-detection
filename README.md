@@ -203,13 +203,3 @@ mAP@50 从 90.47% 提升至 96.46%，提升 5.99 个百分点。
 ## 许可证
 
 MIT License
-
-## 参考文献
-
-- He, K., et al. "Faster R-CNN." IEEE TPAMI, 2017.
-- He, K., et al. "Mask R-CNN." ICCV, 2017.
-- Lin, T.Y., et al. "Feature Pyramid Networks." CVPR, 2017.
-
-## 联系方式
-
-如有问题，请提交 Issue 或联系作者。
